@@ -1,0 +1,51 @@
+const ds18b20 = require("ds18b20");
+const rpio = require("rpio");
+const util = require("util");
+
+const catchAsync = require("../utils/catchAsync");
+
+exports.getTemperature = catchAsync(async (req, res, next) => {
+	const readSensors = util.promisify(ds18b20.sensors);
+	const readTemperature = util.promisify(ds18b20.temperature);
+	let sensors = await readSensors();
+	
+	console.log(sensors)	
+	
+	let temperatures = [];
+	
+	for (const sensor of sensors) {
+		temperatures.push(await readTemperature(sensor));	
+	}
+	
+	for (let i = 0; i < temperatures.length; i++) {
+		console.log(`Temperature on sensor: ${sensors[i]} is: ${temperatures[i]}`);
+	}
+	
+	console.log(`Reading takes: ${Date.now() - req.startTime} ms`);
+	
+	res.status(200).json({
+		status: "success",
+		data: {
+			sensors,
+			temperatures
+		},
+		time: Date.now() - req.startTime
+	});
+
+});
+
+exports.togglePort = (req, res, next) => {
+	const port = req.query.port * 1;
+	const portStatus = rpio.read(port);
+	rpio.write(port, !portStatus ? 1 : 0);
+	const enabled = !portStatus ? "enabled" : "disabled";
+	console.log(`Port ${port} is ${enabled} in ${Date.now() - req.startTime}ms`)
+	
+	res.status(200).json({
+		status: "success",
+		data: {
+			portStatus: !portStatus
+		},
+		time: Date.now() - req.startTime
+	});
+}
