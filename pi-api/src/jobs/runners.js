@@ -4,9 +4,9 @@ const jobs = require("./onDemand.jobs");
 
 
 
-//exports.immediateTasksRunner = cron(
- // "*/2 * * * * *",
- // programmedJobs.immediateTasks
-//);
+exports.immediateTasksRunner = cron(
+  "*/1 * * * * *",
+  programmedJobs.immediateTasks
+);
 
 

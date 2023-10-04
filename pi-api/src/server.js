@@ -1,5 +1,7 @@
 const dotenv = require("dotenv");
 const rpio = require("rpio");
+const ds18b20 = require("ds18b20");
+const util = require("util");
 const app = require("./app");
 const Queue = require("./utils/queue");
 const runners = require("./jobs/runners");
@@ -7,16 +9,43 @@ const rpioUtils = require("./utils/rpioUtils");
 
 dotenv.config();
 
-process.on("uncaughtException", (err) => {
-  console.log("Uncaught exception! Shutting down...");
-  process.exit(1);
-});
+//process.on("uncaughtException", (err) => {
+//  console.log("Uncaught exception! Shutting down...");
+//  process.exit(1);
+//});
 
 const port = process.env.PORT || 3000; 
 
 //configure rpio ports
-const rpioPorts = process.env.RPIO_PORTS.split(",").map(item => parseInt(item));
-rpioUtils.openPorts(rpioPorts);
+const rpioOutputPorts = process.env.RPIO_OUTPUT_PORTS.split(",").map(item => parseInt(item));
+const pullUpPorts = process.env.RPIO_PULLUP_PORTS.split(",").map(item => parseInt(item));
+global.rpioOutputPorts = rpioOutputPorts;
+global.pullUpPorts = pullUpPorts;
+
+// open ports
+rpioUtils.openPorts(rpioOutputPorts, rpio.OUTPUT, rpio.LOW);
+rpioUtils.openPorts(pullUpPorts, rpio.INPUT, rpio.PULL_UP);
+
+console.log(`Opened ${rpioOutputPorts.length} as OUTPUT GPIO ports: ${process.env.RPIO_OUTPUT_PORTS}`);
+console.log(`Opened ${pullUpPorts.length} as PULLUP GPIO ports: ${process.env.RPIO_PULLUP_PORTS}`);
+
+// bind button listener
+
+global.relayNo = 0;
+rpio.poll(pullUpPorts[0], rpioUtils.getButtonState);
+
+
+try {
+	ds18b20.sensors((err, ids) => {
+		if (err) {
+			throw "Thermal sensors not found!";		
+		}
+		
+		console.log(`Found ${ids.length} sensors: ${ids.join(", ")}`);
+	})
+} catch (error) {
+	console.log(error);
+};
 
 
 const server = app.listen(port, () => {
@@ -24,7 +53,7 @@ const server = app.listen(port, () => {
 });
 
 global.immediateTasks = new Queue();
-//runners.immediateTasksRunner.running();
+runners.immediateTasksRunner.trigger();
 
 
 
