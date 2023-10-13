@@ -3,18 +3,19 @@ const rpio = require("rpio");
 const util = require("util");
 
 const catchAsync = require("../utils/catchAsync");
-const { getSensors, readTemperature } = require("../utils/rpioUtils");
+const rpioUtils = require("../utils/rpioUtils")
 
 exports.getTemperature = catchAsync(async (req, res, next) => {
+	const readSensors = util.promisify(ds18b20.sensors);
+	const readTemperature = util.promisify(ds18b20.temperature);
+	let sensors = await readSensors();
 	
-	let sensors = await getSensors();
-	
-	console.log(sensors);
+	console.log(sensors)	
 	
 	let temperatures = [];
 	
 	for (const sensor of sensors) {
-		temperatures.push(await readTemperature(sensor));
+		temperatures.push(await readTemperature(sensor));	
 	}
 	
 	for (let i = 0; i < temperatures.length; i++) {

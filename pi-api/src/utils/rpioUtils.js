@@ -1,5 +1,7 @@
 const rpio = require("rpio");
-const { addImmediateTask, changeRelay } = require("../jobs/onDemand.jobs");
+const ds18b20 = require("ds18b20");
+const { exec } = require("child_process");
+const util = require("util");
 
 exports.openPorts = (ports, mode, init) => {
 //	console.log("rpio low", mode);
@@ -14,10 +16,26 @@ exports.closePorts = (ports) => {
 	}
 }
 
-exports.getButtonState = (pin) => {
-	const state = rpio.read(pin);
-	if (state) {
-		console.log("Pulled")
-		addImmediateTask(changeRelay);
-	} 
+exports.writePorts = (ports, value) => {
+	for (const port of ports) {
+		if (rpio.read(port) !== value) {
+			rpio.write(port, value);
+		}
+	}
 }
+
+exports.getSensors = util.promisify(ds18b20.sensors);
+
+const temperatureReader = util.promisify(ds18b20.temperature);
+
+exports.readTemperature = async (sensor) => {
+	return await temperatureReader(sensor);
+}
+
+exports.writeLCD = async (first, second) => {
+	const cmd = util.promisify(exec);
+
+	await cmd(`python3 LCD.py "${first}" "${second}"`);
+
+}
+

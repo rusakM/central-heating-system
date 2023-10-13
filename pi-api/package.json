@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "child_process": "^1.0.2",
     "cookie-parser": "^1.4.6",
     "croner": "^7.0.2",
     "dotenv": "^16.3.1",

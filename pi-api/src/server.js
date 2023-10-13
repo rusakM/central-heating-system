@@ -5,6 +5,7 @@ const util = require("util");
 const app = require("./app");
 const Queue = require("./utils/queue");
 const runners = require("./jobs/runners");
+const { getButtonState } = require("./jobs/functions.jobs");
 const rpioUtils = require("./utils/rpioUtils");
 
 dotenv.config();
@@ -15,6 +16,10 @@ dotenv.config();
 //});
 
 const port = process.env.PORT || 3000; 
+
+//read sensors map
+global.sensorsMap = JSON.parse(process.env.RPIO_SENSORS_MAP);
+console.log(sensorsMap);
 
 //configure rpio ports
 const rpioOutputPorts = process.env.RPIO_OUTPUT_PORTS.split(",").map(item => parseInt(item));
@@ -32,7 +37,8 @@ console.log(`Opened ${pullUpPorts.length} as PULLUP GPIO ports: ${process.env.RP
 // bind button listener
 
 global.relayNo = 0;
-rpio.poll(pullUpPorts[0], rpioUtils.getButtonState);
+global.sensorNo = 0;
+rpio.poll(pullUpPorts[0], getButtonState);
 
 
 try {
@@ -54,12 +60,12 @@ const server = app.listen(port, () => {
 
 global.immediateTasks = new Queue();
 runners.immediateTasksRunner.trigger();
+runners.LCDRunner.trigger();
 
 
 
 process.on("unhandledRejection", (err) => {
   console.log("Unhandled rejection. Shutting down...");
-  rpioUtils.closePorts(rpioPorts);
   server.close(() => {
     process.exit(1);
   });
