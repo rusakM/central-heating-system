@@ -8,6 +8,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const errorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRouter");
@@ -48,6 +49,17 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+app.use(
+    express.json({
+        limit: "10mb",
+    })
+);
+app.use(
+    express.urlencoded({
+        extended: true,
+        limit: "10mb",
+    })
+);
 app.use(cookieParser());
 
 // data sanitization against nosql query injection

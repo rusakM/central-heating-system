@@ -10,6 +10,11 @@ const userHomeSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
+        createdAt: Date,
+        active: {
+            type: Boolean,
+            default: true,
+        },
     },
     {
         toJSON: { virtuals: true },
@@ -31,6 +36,14 @@ userHomeSchema.pre(/^find/, function (next) {
         select: "-__v -active -homes",
         options: { _recursed: true },
     });
+
+    next();
+});
+
+userHomeSchema.pre("save", function (next) {
+    if (this.isNew) {
+        this.createdAt = Date.now();
+    }
 
     next();
 });

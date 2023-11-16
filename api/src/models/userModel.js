@@ -3,6 +3,12 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
+exports.userRoles = {
+    admin: "admin",
+    board: "board",
+    user: "user",
+};
+
 const userSchema = new mongoose.Schema(
     {
         name: {
@@ -18,6 +24,11 @@ const userSchema = new mongoose.Schema(
                 validator.isEmail,
                 "Niepoprawny adres email, spróbuj ponownie",
             ],
+        },
+        role: {
+            default: userRoles.user,
+            type: String,
+            enum: Object.keys(userRoles),
         },
         password: {
             type: String,

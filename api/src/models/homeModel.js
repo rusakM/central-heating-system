@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+const UserHome = require("./userHomeModel");
 
 const homeSchema = new mongoose.Schema(
     {
         name: String,
         barcode: String,
+        createdAt: Date,
     },
     {
         toJSON: { virtuals: true },
@@ -38,6 +40,14 @@ homeSchema.pre(/^find/, function (next) {
         select: "-__v",
         options: { _recursed: true },
     });
+
+    next();
+});
+
+homeSchema.pre("save", function (next) {
+    if (this.isNew) {
+        this.createdAt = Date.now();
+    }
 
     next();
 });
