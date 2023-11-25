@@ -1,6 +1,6 @@
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
-const app = require("./app");
+import * as dotenv from "dotenv";
+import mongoose from "mongoose";
+import app from "./app";
 
 dotenv.config();
 
@@ -9,21 +9,23 @@ process.on("uncaughtException", (err) => {
     process.exit(1);
 });
 
-const dbPassword = process.env.DATABASE_PASSWORD;
-const dbUser = process.env.DATABASE_USER;
-const dbName = process.env.DATABASE_NAME;
+const dbPassword: string = String(process.env.DATABASE_PASSWORD);
+const dbUser: string = String(process.env.DATABASE_USER);
+const dbName: string = String(process.env.DATABASE_NAME);
+const database: string = String(process.env.DATABASE);
 
-const DB = process.env.DATABASE.replace("<password>", dbPassword)
+const DB: string = database
+    .replace("<password>", dbPassword)
     .replace("<username>", dbUser)
     .replace("<database>", dbName);
 
 mongoose.connect(DB);
 
-const dbConnection = mongoose.connection;
+const dbConnection: mongoose.Connection = mongoose.connection;
 dbConnection.once("open", () => console.log("connection with db OK!"));
 dbConnection.on("error", (err) => console.error(err));
 
-const port = process.env.PORT || 3000;
+const port: string | number = process.env.PORT || 3000;
 const server = app.listen(port, () => {
     console.log(`App is running on ${port}...`);
 });
@@ -35,7 +37,7 @@ const server = app.listen(port, () => {
 // app.set("io", io);
 
 process.on("unhandledRejection", (err) => {
-    console.log("Unhandles rejection. Shutting down...");
+    console.log("Unhandled rejection. Shutting down...");
     server.close(() => {
         process.exit(1);
     });

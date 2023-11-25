@@ -1,11 +1,11 @@
-const express = require("express");
-const authController = require("../controllers/authController");
-const boardController = require("../controllers/boardController");
-const temperatureController = require("../controllers/temperatureController");
-const alarmController = require("../controllers/alarmController");
-const sensorController = require("../controllers/sensorController");
+import express, { Router } from "express";
+import * as authController from "../controllers/authController";
+import * as boardController from "../controllers/boardController";
+import * as temperatureController from "../controllers/temperatureController";
+import * as alarmController from "../controllers/alarmController";
+import * as sensorController from "../controllers/sensorController";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 router.use(authController.protect);
 router.use(boardController.checkBoardRestrictions);
@@ -21,10 +21,7 @@ router
     .post(alarmController.createAlarm);
 router
     .route("/:id/temperatures")
-    .get(
-        boardController.getBoardTemperatures,
-        temperatureController.getTemperatures
-    )
+    .get(boardController.selectBoard, temperatureController.getTemperatures)
     .post(temperatureController.createTemperature);
 
 router
@@ -36,4 +33,4 @@ router
     )
     .post(sensorController.createSensor);
 
-module.exports = router;
+export default router;

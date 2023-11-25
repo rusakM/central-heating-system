@@ -1,6 +1,23 @@
-const mongoose = require("mongoose");
+import { Document, Schema, model } from "mongoose";
+import { ISensor } from "./sensorModel";
+import { IHome } from "./homeModel";
 
-const boardSchema = new mongoose.Schema(
+interface IBoardSchema extends Document {
+    id?: Schema.Types.ObjectId | string;
+    _id?: Schema.Types.ObjectId | string;
+    name?: string;
+    ip?: string;
+    active?: boolean;
+    home?: IHome | Schema.Types.ObjectId;
+    gpioPinsOutput?: string;
+    gpioPinsPullUp?: string;
+}
+
+export interface IBoard extends IBoardSchema {
+    sensors?: ISensor[] | Schema.Types.ObjectId[];
+}
+
+const boardSchema: Schema = new Schema<IBoardSchema>(
     {
         name: String,
         ip: String,
@@ -9,7 +26,7 @@ const boardSchema = new mongoose.Schema(
             default: true,
         },
         home: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Home",
             required: [true, "Płytka musi przynależeć do domu"],
         },
@@ -35,7 +52,7 @@ boardSchema.virtual("sensors", {
     match: { active: true },
 });
 
-boardSchema.pre(/^find/, function (next) {
+boardSchema.pre(/^find/, function (this: any, next) {
     if (this.options._recursed) {
         return next();
     }
@@ -53,4 +70,4 @@ boardSchema.pre(/^find/, function (next) {
     next();
 });
 
-module.exports = mongoose.model("Board", boardSchema);
+export default model<IBoard>("Board", boardSchema);

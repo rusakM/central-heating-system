@@ -1,10 +1,10 @@
-const express = require("express");
-const authController = require("../controllers/authController");
-const handlerFactory = require("../controllers/handlerFactory");
-const homeController = require("../controllers/homeController");
-const Home = require("../models/homeModel");
+import express, { Router } from "express";
+import * as authController from "../controllers/authController";
+import * as handlerFactory from "../controllers/handlerFactory";
+import * as homeController from "../controllers/homeController";
+import Home from "../models/homeModel";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 router.use(authController.protect);
 
@@ -21,4 +21,4 @@ router
     .get(handlerFactory.getOne(Home))
     .patch(handlerFactory.updateOne(Home));
 
-module.exports = router;
+export default router;

@@ -1,15 +1,37 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
+import { Schema, model, Document, Query, Model } from "mongoose";
+import validator from "validator";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
-exports.userRoles = {
+export const userRoles = {
     admin: "admin",
     board: "board",
     user: "user",
 };
 
-const userSchema = new mongoose.Schema(
+export interface IUser {
+    name?: string;
+    email?: string;
+    role?: string;
+    active?: boolean;
+    password?: string;
+    passwordConfirm?: string | undefined;
+    passwordChangedAt?: Date;
+    passwordResetToken?: string | undefined;
+    passwordResetExpires?: Date | undefined;
+    correctPassword?: (
+        candidatePassword: string,
+        userPassword: string
+    ) => Promise<boolean>;
+    changedPasswordAfter?: (JWTTimestamp: number) => boolean;
+    createPasswordResetToken?: () => string;
+}
+
+export interface IUserDocument extends IUser, Document {}
+
+//interface IUserModel extends Model<IUserDocument> {}
+
+const userSchema: Schema<IUserDocument> = new Schema(
     {
         name: {
             type: String,
@@ -61,14 +83,16 @@ userSchema.pre("save", async function (next) {
     }
 
     //hash the password
-    this.password = (await bcrypt.hash(this.password, 10)) + "";
+    this.password = (await bcrypt.hash(String(this.password), 10)) + "";
     //delete passwordConfirm field
     this.passwordConfirm = undefined;
     next();
 });
 
 // this method will run before searching in dbs, to filter out unactive users
-userSchema.pre(/^find/, function (next) {
+userSchema.pre<
+    Query<IUserDocument, IUserDocument, IUserDocument, IUserDocument>
+>(/^find/, function (next) {
     this.model.find({ active: { $ne: false } });
     next();
 });
@@ -84,15 +108,15 @@ userSchema.pre("save", function (next) {
 
 // this method compares given password with password in db when the user wants to log in
 userSchema.methods.correctPassword = async function (
-    candidatePassword,
-    userPassword
+    candidatePassword: string,
+    userPassword: string
 ) {
     return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 // this method will check if the password was changed after generate the token
 // which was sent by user, it prevents to log in with old password
-userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp: number) {
     if (this.passwordChangedAt) {
         const changedTimestamp = parseInt(
             `${this.passwordChangedAt.getTime() / 1000}`,
@@ -118,4 +142,4 @@ userSchema.methods.createPasswordResetToken = function () {
     return resetToken;
 };
 
-module.exports = mongoose.model("User", userSchema);
+export default model<IUserDocument>("User", userSchema);

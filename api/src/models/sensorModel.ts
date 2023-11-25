@@ -1,11 +1,21 @@
-const mongoose = require("mongoose");
+import { Document, Schema, model } from "mongoose";
+import { IBoard } from "./boardModel";
 
-const sensorSchema = new mongoose.Schema(
+export interface ISensor extends Document {
+    id?: Schema.Types.ObjectId | string;
+    _id?: Schema.Types.ObjectId | string;
+    name?: string;
+    customName?: string;
+    board?: IBoard | Schema.Types.ObjectId;
+    active?: boolean;
+}
+
+const sensorSchema: Schema = new Schema<ISensor>(
     {
         name: String,
         customName: String,
         board: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Board",
         },
         active: {
@@ -19,7 +29,7 @@ const sensorSchema = new mongoose.Schema(
     }
 );
 
-sensorSchema.pre(/^find/, function (next) {
+sensorSchema.pre(/^find/, function (this: any, next) {
     if (this.options._recursed) {
         return next();
     }
@@ -33,4 +43,4 @@ sensorSchema.pre(/^find/, function (next) {
     next();
 });
 
-module.exports = mongoose.model("Sensor", sensorSchema);
+export default model<ISensor>("Sensor", sensorSchema);

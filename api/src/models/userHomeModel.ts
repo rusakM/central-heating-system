@@ -1,13 +1,24 @@
-const mongoose = require("mongoose");
+import { Document, Schema, model } from "mongoose";
+import { IUser } from "./userModel";
+import { IHome } from "./homeModel";
 
-const userHomeSchema = new mongoose.Schema(
+export interface IUserHome extends Document {
+    id?: Schema.Types.ObjectId | string;
+    _id?: Schema.Types.ObjectId | string;
+    home: IHome | Schema.Types.ObjectId;
+    user: IUser | Schema.Types.ObjectId;
+    createdAt: Date;
+    active: boolean;
+}
+
+const userHomeSchema: Schema = new Schema<IUserHome>(
     {
         home: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Home",
         },
         user: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "User",
         },
         createdAt: Date,
@@ -22,7 +33,7 @@ const userHomeSchema = new mongoose.Schema(
     }
 );
 
-userHomeSchema.pre(/^find/, function (next) {
+userHomeSchema.pre(/^find/, function (this: any, next) {
     if (this.options._recursed) {
         return next();
     }
@@ -48,4 +59,4 @@ userHomeSchema.pre("save", function (next) {
     next();
 });
 
-module.exports = mongoose.model("UserHome", userHomeSchema);
+export default model<IUserHome>("UserHome", userHomeSchema);

@@ -1,10 +1,22 @@
-const mongoose = require("mongoose");
+import { Schema, model, Document } from "mongoose";
+import { IBoard } from "./boardModel";
 
-const actionSchema = new mongoose.Schema(
+export interface IAction extends Document {
+    id?: Schema.Types.ObjectId | string;
+    _id?: Schema.Types.ObjectId | string;
+    actionType?: number;
+    board?: IBoard | Schema.Types.ObjectId;
+    pinBoard?: number;
+    createdAt?: Date;
+    status?: string;
+    forced?: boolean;
+}
+
+const actionSchema: Schema = new Schema<IAction>(
     {
         actionType: Number,
         board: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Board",
         },
         pinBoard: Number,
@@ -23,7 +35,7 @@ const actionSchema = new mongoose.Schema(
     }
 );
 
-actionSchema.pre(/^find/, function (next) {
+actionSchema.pre(/^find/, function (this: any, next) {
     if (this.options._recursed) {
         return next();
     }
@@ -37,4 +49,4 @@ actionSchema.pre(/^find/, function (next) {
     next();
 });
 
-module.exports = mongoose.model("Action", actionSchema);
+export default model<IAction>("Action", actionSchema);

@@ -31,6 +31,7 @@ coverage
 # Dependency directories
 #/pi-api/node_modules/
 *build/
+*dist/
 *node_modules/
 /package-lock.json
 /package.json

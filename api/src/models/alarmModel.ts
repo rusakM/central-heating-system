@@ -1,13 +1,23 @@
-const mongoose = require("mongoose");
+import { Document, Schema, model } from "mongoose";
+import { IBoard } from "./boardModel";
+import { ITemperature } from "./temperatureModel";
 
-const alarmSchema = new mongoose.Schema(
+export interface IAlarm extends Document {
+    id?: Schema.Types.ObjectId | string;
+    _id?: Schema.Types.ObjectId | string;
+    board: IBoard | Schema.Types.ObjectId;
+    temperature: ITemperature | Schema.Types.ObjectId;
+    createdAt: Date;
+}
+
+const alarmSchema: Schema = new Schema<IAlarm>(
     {
         board: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Board",
         },
         temperature: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Temperature",
         },
         createdAt: {
@@ -20,7 +30,7 @@ const alarmSchema = new mongoose.Schema(
     }
 );
 
-alarmSchema.pre(/^find/, function (next) {
+alarmSchema.pre(/^find/, function (this: any, next) {
     if (this.options._recursed) {
         return next();
     }
@@ -38,4 +48,4 @@ alarmSchema.pre(/^find/, function (next) {
     next();
 });
 
-module.exports = mongoose.model("Alarm", alarmSchema);
+export default model<IAlarm>("Alarm", alarmSchema);
