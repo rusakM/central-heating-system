@@ -3,10 +3,10 @@ import { IUser } from "./userModel";
 import { IHome } from "./homeModel";
 
 export interface IUserHome extends Document {
-    id?: Schema.Types.ObjectId | string;
-    _id?: Schema.Types.ObjectId | string;
-    home: IHome | Schema.Types.ObjectId;
-    user: IUser | Schema.Types.ObjectId;
+    id?: string;
+    _id?: string;
+    home: IHome;
+    user: IUser;
     createdAt: Date;
     active: boolean;
 }

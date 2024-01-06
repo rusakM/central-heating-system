@@ -41,12 +41,16 @@ export const inviteUser = catchAsync(
     async (req: IRequest, res: Response, next: NextFunction) => {
         const { user, home } = req.body;
 
+        if (!user || !user._id) {
+            return next(new AppError("Nie jesteś zalogowany.", 401));
+        }
+
         if ((await User.findById(user)) && (await Home.findById(home))) {
             return res.status(200).json({
                 status: "success",
                 data: {
                     ...req.body,
-                    homeOwner: req.user._id,
+                    homeOwner: user._id,
                 },
             });
         }

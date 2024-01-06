@@ -1,4 +1,5 @@
 import { NextFunction, Response } from "express";
+import superagent from "superagent";
 
 import Alarm from "../models/alarmModel";
 import Board, { IBoard } from "../models/boardModel";
@@ -13,18 +14,16 @@ import { createOne, updateOne } from "./handlerFactory";
 
 export const checkBoardRestrictions = catchAsync(
     async (req: IRequest, res: Response, next: NextFunction) => {
-        const { _id, role } = req.user;
         const boardId = req.params.id;
-
         const board: IBoard | null = await Board.findById(boardId);
 
         if (!board) {
             return next(new AppError("Podana płytka nie istnieje", 404));
         }
 
-        if (role === userRoles.user) {
+        if (req.user?.role === userRoles.user) {
             const userHome: IUserHome | null = await UserHome.findOne({
-                user: _id,
+                user: req.user?._id,
                 home: board.home,
             });
 
@@ -61,3 +60,21 @@ export function selectBoard(req: IRequest, res: Response, next: NextFunction) {
     req.query.board = req.params.id;
     next();
 }
+
+export const ping = catchAsync(
+    async (req: IRequest, res: Response, next: NextFunction) => {
+        const board = await Board.findById(req.params.id);
+
+        if (!board) {
+            return next(new AppError("Płytka nie istnieje", 404));
+        }
+
+        const pingRequest = await superagent.get(
+            `http://${board.ip}/board/ping`
+        );
+
+        if (pingRequest.statusCode !== 200) {
+            return res.status(pingRequest.statusCode).json(pingRequest.body);
+        }
+    }
+);

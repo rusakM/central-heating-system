@@ -3,8 +3,8 @@ import { IUserHome } from "./userHomeModel";
 import { IBoard } from "./boardModel";
 
 interface IHomeSchema extends Document {
-    id?: Schema.Types.ObjectId | string;
-    _id?: Schema.Types.ObjectId | string;
+    id?: string;
+    _id?: string;
     name?: string;
     barcode?: string;
     createdAt?: string;
@@ -32,7 +32,7 @@ const homeSchema: Schema = new Schema<IHomeSchema>(
 );
 
 homeSchema.virtual("boards", {
-    ref: "Boards",
+    ref: "Board",
     foreignField: "home",
     localField: "_id",
     match: { active: true },
@@ -50,12 +50,18 @@ homeSchema.pre(/^find/, function (this: any, next) {
     }
 
     this.populate({
-        path: "boards",
-        select: "-__v -active -gpioPinsOutput -gpioPinsPullUp",
-        options: { _recursed: true },
-    }).populate({
         path: "users",
         select: "-__v",
+        options: { _recursed: true },
+        populate: {
+            path: "user",
+            select: "_id name email role active",
+            options: { _recursed: true },
+        },
+    });
+    this.populate({
+        path: "boards",
+        select: "-__v -active -gpioPinsOutput -gpioPinsPullUp",
         options: { _recursed: true },
     });
 
@@ -72,4 +78,4 @@ homeSchema.pre("save", function (next) {
     next();
 });
 
-export default model<IHome>("Home", homeSchema);
+export default model<IHomeSchema>("Home", homeSchema);

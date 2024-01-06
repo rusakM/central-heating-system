@@ -46,7 +46,7 @@ const boardSchema: Schema = new Schema<IBoardSchema>(
 );
 
 boardSchema.virtual("sensors", {
-    ref: "Sensors",
+    ref: "Sensor",
     foreignField: "board",
     localField: "_id",
     match: { active: true },
@@ -70,4 +70,4 @@ boardSchema.pre(/^find/, function (this: any, next) {
     next();
 });
 
-export default model<IBoard>("Board", boardSchema);
+export default model<IBoardSchema>("Board", boardSchema);

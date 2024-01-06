@@ -156,3 +156,15 @@ export async function jwtVerify(token: string, secret: string): Promise<any> {
         });
     });
 }
+
+export const verifyUserPermissions = catchAsync(
+    async (req: IRequest, res: Response, next: NextFunction) => {
+        if (!req.user) {
+            return next(new AppError("Najpierw należy się zalogować.", 403));
+        }
+
+        console.log(req);
+
+        next();
+    }
+);

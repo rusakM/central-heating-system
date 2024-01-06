@@ -12,7 +12,10 @@ export interface ISensor extends Document {
 
 const sensorSchema: Schema = new Schema<ISensor>(
     {
-        name: String,
+        name: {
+            type: String,
+            required: [true, "Proszę podać nazwę sensora"],
+        },
         customName: String,
         board: {
             type: Schema.Types.ObjectId,

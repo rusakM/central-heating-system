@@ -97,7 +97,7 @@ export function createOne(Model: any) {
     );
 }
 
-export function getOne(Model: any, popOptions: any = {}) {
+export function getOne(Model: any, popOptions: string = "") {
     return catchAsync(
         async (req: IRequest, res: Response, next: NextFunction) => {
             await checkUserRestriction(
