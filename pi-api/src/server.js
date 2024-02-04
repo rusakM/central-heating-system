@@ -66,7 +66,8 @@ runners.LCDRunner.trigger();
 
 process.on("unhandledRejection", (err) => {
   console.log("Unhandled rejection. Shutting down...");
-  server.close(() => {
+  console.log(err); 
+ server.close(() => {
     process.exit(1);
   });
 });
