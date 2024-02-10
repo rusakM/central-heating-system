@@ -1,7 +1,6 @@
 import express, { Router } from "express";
 import * as authController from "../controllers/authController";
 import * as boardController from "../controllers/boardController";
-import * as temperatureController from "../controllers/temperatureController";
 import alarmRouter from "./alarmRouter";
 import sensorRouter from "./sensorRouter";
 import temperatureRouter from "./temperatureRouter";

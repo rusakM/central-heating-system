@@ -1,9 +1,7 @@
 const express = require("express");
 
 const errorHandler = require("./controllers/errorController");
-const taskRouter = require("./routes/taskRoutes");
-const gpioRouter = require("./routes/gpioRoutes");
-const boardRouter = require("./routes/boardRoutes");
+const router = require("./routes/router");
 
 const app = express();
 
@@ -21,9 +19,7 @@ app.use(
 
 // 2) ROUTES
 
-app.use("/tasks", taskRouter);
-app.use("/gpio", gpioRouter);
-app.use("/board", boardRouter);
+app.use("/", router);
 
 app.use(errorHandler);
 

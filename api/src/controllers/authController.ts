@@ -67,7 +67,6 @@ export const signup = catchAsync(
 export const login = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const { email, password } = req.body;
-
         if (!email || !password) {
             return next(
                 new AppError("Nie podano adresu email lub hasła.", 400)
