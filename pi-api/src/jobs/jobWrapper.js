@@ -1,6 +1,6 @@
-module.exports = (fn) => {
-    if (!global.configSuccess) {
-        return;
-    }
-    return fn;
+module.exports = (fn) => async () => {
+  if (!global.configSuccess) {
+    return;
+  }
+  return await fn();
 };
