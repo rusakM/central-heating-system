@@ -14,6 +14,7 @@ exports.closePorts = (ports) => {
 	for (const port of ports) {
 		rpio.close(port);
 	}
+	rpio.exit();
 }
 
 exports.writePorts = (ports, value) => {

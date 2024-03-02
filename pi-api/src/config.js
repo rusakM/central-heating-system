@@ -33,6 +33,9 @@ exports.SetRpioConfig = async function () {
   global.rpioOutputPorts = rpioOutputPorts;
   global.pullUpPorts = pullUpPorts;
   global.boardId = boardId;
+  
+  console.log('PullUpPorts:', pullUpPorts);
+  console.log('gpioPins:', rpioOutputPorts);
 
   //open ports
   rpioUtils.openPorts(rpioOutputPorts, rpio.OUTPUT, rpio.LOW);
@@ -46,6 +49,7 @@ exports.SetRpioConfig = async function () {
   initializeSensors();
 
   global.configSuccess = true;
+  
 };
 
 exports.getBoardConfig = async () => {
@@ -115,6 +119,16 @@ function createSensorsMap(sensors) {
   return sensorsMap;
 }
 
+function createArrayFromSensorsMap(sensorsMap) {
+	const arr = [];
+	
+	for (const sensor in sensorsMap) {
+		arr.push(sensor);
+	}
+	
+	return arr;
+}
+
 async function initializeSensors() {
   await ds18b20.sensors(async (err, ids) => {
     if (err) {
@@ -130,6 +144,7 @@ async function initializeSensors() {
         ? createSensorsMap(sensors)
         : initializeSensorsOffline(ids);
     }
+    global.sensorsArray = createArrayFromSensorsMap(global.sensorsMap);
   });
 }
 

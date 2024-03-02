@@ -7,12 +7,11 @@ const {
   writeLCD,
   writePorts,
 } = require("../utils/rpioUtils");
-const config = require("../config");
 
-exports.hello = jobWrapper(function () {
+exports.hello = function () {
   const d = new Date();
   console.log("task ok at: ", d.toTimeString());
-});
+};
 
 exports.changeRelay = jobWrapper(async () => {
   const rpioOutputPorts = global?.outputPorts;
@@ -43,26 +42,27 @@ exports.changeRelay = jobWrapper(async () => {
 });
 
 exports.writeTemperature = jobWrapper(async () => {
-  let isConfigRefreshNeeded;
-  if (!global?.sensorNo) {
+	if (!global.configSuccess) {
+		return;	
+	}
+  if (!typeof global?.sensorNo === 'number' || global.sensorNo < 0) {
     return;
   }
-  let sensors = global.sensorsMap;
+  let sensors = global.sensorsArray;
 
   if (!sensors) {
     sensors = await getSensors();
-    isConfigRefreshNeeded = true;
   }
-  const temperature = await readTemperature(sensors[global.sensorNo]);
-  await writeLCD(
-    `${global.sensorsMap[sensors[global.sensorNo]].name}:`,
+  const currentSensor = sensors[global.sensorNo];
+  const temperature = await readTemperature(currentSensor);
+  writeLCD(
+    `${global.sensorsMap[currentSensor].name}:`,
     `${temperature}C`
   );
 
   global.sensorNo =
     global.sensorNo < sensors.length - 1 ? global.sensorNo + 1 : 0;
 
-  if (isConfigRefreshNeeded) config.SetRpioConfig();
 });
 
 exports.refreshTemperature = jobWrapper(async () => {
